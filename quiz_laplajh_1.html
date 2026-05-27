@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LAPLA'JH — Quiz d'évaluation</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F4F0F8;color:#1a1a1a;min-height:100vh}
+.topbar{background:linear-gradient(135deg,#1B3A6B 0%,#7B4FA6 100%);color:white;padding:14px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;box-shadow:0 2px 10px rgba(27,58,107,.3)}
+.logo{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:800;flex:1}
+.topbar-sub{font-size:11px;opacity:.8;margin-top:1px}
+.prog-wrap{background:#12285a;height:5px}
+.prog-bar{height:100%;background:#C4A8E8;transition:width .4s}
+.shell{max-width:680px;margin:0 auto;padding:16px 14px 60px}
+.page{display:none}.page.active{display:block}
+
+.intro-hero{background:linear-gradient(135deg,#1B3A6B,#7B4FA6);border-radius:16px;padding:28px 24px;color:white;margin-bottom:16px;text-align:center}
+.intro-hero h1{font-size:20px;font-weight:800;margin-bottom:8px}
+.intro-hero p{font-size:13px;opacity:.85;line-height:1.6}
+.info-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:16px}
+.info-box{background:rgba(255,255,255,.15);border-radius:10px;padding:12px;text-align:center}
+.info-box .num{font-size:22px;font-weight:900}
+.info-box .lbl{font-size:10px;opacity:.8;text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+
+.card{background:white;border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(123,79,166,.1);border:1px solid #E8E0F0}
+.card-title{font-size:11px;font-weight:800;color:#7B4FA6;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';width:3px;height:14px;background:linear-gradient(#1B3A6B,#7B4FA6);border-radius:2px;flex-shrink:0}
+.field{margin-bottom:12px}.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:13px;font-weight:600;color:#444;margin-bottom:5px}
+.field input,.field select{width:100%;padding:12px 14px;border:1.5px solid #DDD5EA;border-radius:10px;font-size:15px;color:#1a1a1a;background:#FAFAFE;font-family:inherit}
+.field input:focus,.field select:focus{outline:none;border-color:#7B4FA6}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.q-block{background:white;border-radius:14px;padding:18px;margin-bottom:14px;border:1.5px solid #E8E0F0}
+.q-num{font-size:10px;font-weight:800;color:#7B4FA6;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.q-text{font-size:15px;font-weight:700;color:#1B3A6B;line-height:1.4;margin-bottom:14px}
+.q-hint{font-size:12px;color:#888;margin-bottom:10px;font-style:italic}
+
+.opt-grid{display:flex;flex-direction:column;gap:8px}
+.opt-btn{width:100%;padding:13px 14px;border:1.5px solid #DDD5EA;border-radius:10px;background:white;text-align:left;font-size:13px;font-weight:500;color:#1a1a1a;cursor:pointer;font-family:inherit;transition:all .15s;line-height:1.4}
+.opt-btn.selected{border-color:#7B4FA6;background:#EDE6F5;color:#4A2A7A;font-weight:700}
+
+.check-grid{display:flex;flex-direction:column;gap:8px}
+.check-opt{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid #DDD5EA;border-radius:10px;background:white;cursor:pointer;transition:all .15s}
+.check-opt.selected{border-color:#7B4FA6;background:#EDE6F5}
+.check-box{width:20px;height:20px;border-radius:5px;border:2px solid #C4A8E8;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;transition:all .15s}
+.check-opt.selected .check-box{background:#7B4FA6;border-color:#7B4FA6}
+.check-label{font-size:13px;line-height:1.4;flex:1}
+
+.open-textarea{width:100%;min-height:110px;padding:12px 14px;border:1.5px solid #DDD5EA;border-radius:10px;font-size:14px;color:#1a1a1a;background:#FAFAFE;font-family:inherit;resize:vertical;line-height:1.5}
+.open-textarea:focus{outline:none;border-color:#7B4FA6}
+
+.prog-steps{display:flex;gap:4px;margin-bottom:16px}
+.ps{flex:1;height:4px;border-radius:2px;background:#DDD5EA}
+.ps.done{background:#7B4FA6}.ps.active{background:#C4A8E8}
+
+.nav{display:flex;gap:10px;margin-top:16px}
+.btn-back{flex:1;padding:15px;border:2px solid #DDD5EA;border-radius:12px;background:white;color:#1B3A6B;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-next{flex:2;padding:15px;border:none;border-radius:12px;background:linear-gradient(135deg,#1B3A6B,#7B4FA6);color:white;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(27,58,107,.3)}
+.btn-next:active,.btn-back:active{transform:scale(.97)}
+.btn-full{flex:3}
+
+/* CONFIRMATION STAGIAIRE */
+.confirm-hero{text-align:center;padding:40px 20px;background:white;border-radius:16px;margin-bottom:14px;border:2px solid #E8E0F0}
+
+/* PIN */
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:260px;margin:0 auto}
+.pin-btn{padding:18px;border:1.5px solid #DDD5EA;border-radius:14px;background:white;font-size:22px;font-weight:800;cursor:pointer;font-family:inherit;color:#1B3A6B;transition:all .15s}
+.pin-btn:active{background:#EDE6F5;transform:scale(.94)}
+.pin-clear{color:#B5281C;border-color:#f5c1c1}
+.pin-empty{background:transparent;border:none;cursor:default}
+.pin-dot{width:18px;height:18px;border-radius:50%;border:2px solid #DDD5EA;background:transparent;transition:all .2s}
+.pin-dot.filled{background:#7B4FA6;border-color:#7B4FA6}
+.pin-dot.error{background:#B5281C;border-color:#B5281C}
+
+/* TABLEAU DE BORD FORMATEUR */
+.db-hero{background:linear-gradient(135deg,#1B3A6B,#7B4FA6);border-radius:16px;padding:20px;margin-bottom:14px;color:white}
+.db-hero h2{font-size:18px;font-weight:800;margin-bottom:4px}
+.db-hero p{font-size:12px;opacity:.8}
+.db-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.db-stat{background:rgba(255,255,255,.15);border-radius:10px;padding:10px;text-align:center}
+.db-stat .dsn{font-size:24px;font-weight:900}
+.db-stat .dsl{font-size:10px;opacity:.8;text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+
+.stag-card{width:100%;background:white;border-radius:12px;padding:14px 16px;margin-bottom:10px;border:1.5px solid #E8E0F0;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;font-family:inherit;transition:all .15s;box-shadow:0 1px 4px rgba(123,79,166,.07)}
+.stag-card:active{transform:scale(.98)}
+.stag-card.evaluated{border-color:#7B4FA6}
+.stag-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#1B3A6B,#7B4FA6);color:white;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stag-avatar.pending{background:linear-gradient(135deg,#888,#aaa)}
+.stag-info{flex:1;min-width:0}
+.stag-name{font-size:14px;font-weight:800;color:#1a1a1a}
+.stag-meta{font-size:11px;color:#888;margin-top:2px}
+.stag-status{text-align:right;flex-shrink:0}
+.badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px}
+.badge-ok{background:#E8F5EF;color:#2E7D52}
+.badge-ko{background:#FEF0EE;color:#B5281C}
+.badge-wait{background:#F0F0F0;color:#888}
+.score-badge{font-size:16px;font-weight:900;color:#1B3A6B;display:block;margin-bottom:2px}
+
+/* CORRECTION FORMATEUR */
+.corr-q{background:white;border-radius:12px;padding:16px;margin-bottom:12px;border:1.5px solid #E8E0F0}
+.corr-q-text{font-size:14px;font-weight:700;color:#1B3A6B;margin-bottom:10px;line-height:1.4}
+.corr-answer{padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.5;margin-bottom:8px}
+.corr-answer.answer-stag{background:#F4F0F8;border:1px solid #C4A8E8;color:#1a1a1a}
+.corr-answer.answer-ref{background:#EEF3FA;border:1px solid #1B3A6B;color:#1B3A6B;font-size:12px}
+.corr-btns{display:flex;gap:8px;margin-top:8px}
+.corr-btn{flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border:2px solid #ddd;background:white;transition:all .15s}
+.corr-btn.ok.active{background:#E8F5EF;border-color:#2E7D52;color:#2E7D52}
+.corr-btn.ko.active{background:#FEF0EE;border-color:#B5281C;color:#B5281C}
+.corr-btn:active{transform:scale(.97)}
+
+.auto-tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px}
+.auto-ok{background:#E8F5EF;color:#2E7D52}
+.auto-ko{background:#FEF0EE;color:#B5281C}
+
+/* BONUS FORMATEUR */
+.bonus-block{background:#EDE6F5;border:2px solid #C4A8E8;border-radius:12px;padding:16px;margin-bottom:12px}
+.bonus-title{font-size:12px;font-weight:800;color:#7B4FA6;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.bonus-desc{font-size:12px;color:#4A2A7A;margin-bottom:12px;line-height:1.5}
+.bonus-btns{display:flex;gap:8px;justify-content:center}
+.bonus-btn{width:52px;height:52px;border-radius:12px;border:2px solid #DDD5EA;background:white;font-size:20px;font-weight:900;cursor:pointer;font-family:inherit;color:#1B3A6B;transition:all .15s}
+.bonus-btn.active{background:#7B4FA6;border-color:#7B4FA6;color:white}
+.bonus-btn:active{transform:scale(.94)}
+
+/* SCORE FINAL */
+.score-final{text-align:center;padding:28px 20px;border-radius:16px;background:white;margin-bottom:12px}
+.score-num{font-size:60px;font-weight:900;line-height:1}
+.score-verdict{font-size:18px;font-weight:800;margin:8px 0 4px}
+.score-detail{font-size:13px;color:#666}
+.recap-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #F4F0F8;font-size:13px;gap:8px}
+.recap-row:last-child{border:none}
+.rk{color:#555;font-size:12px;flex:1;line-height:1.3}
+.total-row{display:flex;justify-content:space-between;align-items:center;padding-top:12px;margin-top:6px;border-top:2px solid #E8E0F0}
+
+/* EXPORT */
+.btn-export{width:100%;padding:14px;border:2px solid #1B3A6B;border-radius:12px;background:white;color:#1B3A6B;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s}
+.btn-export:active{background:#EEF3FA}
+.btn-export.purple{border-color:#7B4FA6;color:#7B4FA6}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">LA</div>
+  <div style="flex:1">
+    <div class="topbar-title">LAPLA'JH Formation</div>
+    <div class="topbar-sub" id="topbar-sub">Quiz d'évaluation théorique</div>
+  </div>
+  <div id="topbar-right" style="font-size:12px;opacity:.8"></div>
+</div>
+<div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:5%"></div></div>
+
+<div class="shell">
+<!-- P0 INTRO -->
+<div class="page active" id="p0">
+  <div class="intro-hero">
+    <h1>Quiz d'évaluation théorique</h1>
+    <p>Formation Le second souffle — LAPLA'JH<br>Répondez à toutes les questions honnêtement.<br>Votre score sera calculé par votre formateur.</p>
+    <div class="info-grid">
+      <div class="info-box"><div class="num">13</div><div class="lbl">Questions</div></div>
+      <div class="info-box"><div class="num">~15</div><div class="lbl">Minutes</div></div>
+      <div class="info-box"><div class="num">60%</div><div class="lbl">Seuil valid.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Votre identité</div>
+    <div class="two-col">
+      <div class="field"><label>Prénom</label><input id="f-prenom" type="text" placeholder="Marie" autocomplete="given-name"></div>
+      <div class="field"><label>Nom</label><input id="f-nom" type="text" placeholder="Dupont" autocomplete="family-name"></div>
+    </div>
+    <div class="field"><label>Date de la session</label><input id="f-date" type="date"></div>
+    <div class="field"><label>Formation suivie</label>
+      <select id="f-formation">
+        <option value="">— Choisir —</option>
+        <option>Être capable autrement</option>
+        <option>Inclusion du handicap en milieu terrestre</option>
+        <option>Aisance aquatique adaptée aux handicaps</option>
+        <option>Inclusion, accessibilité et perfectionnement par l'eau</option>
+        <option selected>Le second souffle — l'autre voie de l'eau</option>
+        <option>Le recyclage</option>
+      </select>
+    </div>
+  </div>
+  <div class="nav"><button class="btn-next btn-full" onclick="startQuiz()">Commencer le quiz →</button></div>
+</div>
+
+<!-- P1 QUESTIONS -->
+<div class="page" id="p1">
+  <div class="prog-steps" id="prog-steps"></div>
+  <div id="question-zone"></div>
+  <div class="nav" id="q-nav"></div>
+</div>
+
+<!-- P2 CONFIRMATION STAGIAIRE -->
+<div class="page" id="p2">
+  <div class="confirm-hero">
+    <div style="font-size:56px;margin-bottom:14px">✅</div>
+    <div style="font-size:20px;font-weight:800;color:#1B3A6B;margin-bottom:8px">Réponses enregistrées !</div>
+    <div style="font-size:14px;color:#555;line-height:1.7;margin-bottom:24px">Merci d'avoir complété le quiz.<br><strong>Merci de remettre la tablette à votre formateur.</strong></div>
+    <div style="background:#F4F0F8;border-radius:14px;padding:22px;border:1.5px solid #DDD5EA">
+      <div style="display:inline-block;background:linear-gradient(135deg,#1B3A6B,#7B4FA6);color:white;font-size:10px;font-weight:800;padding:4px 14px;border-radius:20px;letter-spacing:.08em;margin-bottom:14px">ACCÈS FORMATEUR</div>
+      <div style="font-size:13px;color:#444;margin-bottom:18px">Saisir le code pour accéder à la correction</div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-bottom:20px">
+        <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
+        <div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
+      </div>
+      <div class="pin-grid">
+        <button class="pin-btn" onclick="pinPress('1')">1</button><button class="pin-btn" onclick="pinPress('2')">2</button><button class="pin-btn" onclick="pinPress('3')">3</button>
+        <button class="pin-btn" onclick="pinPress('4')">4</button><button class="pin-btn" onclick="pinPress('5')">5</button><button class="pin-btn" onclick="pinPress('6')">6</button>
+        <button class="pin-btn" onclick="pinPress('7')">7</button><button class="pin-btn" onclick="pinPress('8')">8</button><button class="pin-btn" onclick="pinPress('9')">9</button>
+        <button class="pin-btn pin-clear" onclick="pinClear()">⌫</button><button class="pin-btn" onclick="pinPress('0')">0</button><div class="pin-empty"></div>
+      </div>
+      <div id="pin-error" style="color:#B5281C;font-size:13px;font-weight:700;min-height:22px;margin-top:14px"></div>
+      <button class="btn-next" style="width:100%;margin-top:14px" onclick="nextStagiaire()">+ Stagiaire suivant</button>
+    </div>
+  </div>
+</div>
+
+<!-- P3 TABLEAU DE BORD FORMATEUR -->
+<div class="page" id="p3">
+  <div id="db-zone"></div>
+  <div id="stag-list-zone"></div>
+  <div style="height:12px"></div>
+  <div id="stats-zone"></div>
+  <div style="height:10px"></div>
+  <button class="btn-export" onclick="exportCSV()">↓ Exporter CSV (Qualiopi)</button>
+  <button class="btn-export purple" onclick="exportHTML()">☐ Tableau récapitulatif imprimable</button>
+</div>
+
+<!-- P4 CORRECTION UN STAGIAIRE -->
+<div class="page" id="p4">
+  <div id="corr-zone"></div>
+</div>
+
+<!-- P5 RÉSULTAT VALIDÉ -->
+<div class="page" id="p5">
+  <div id="result-zone"></div>
+</div>
+</div>
+
+<script>
+var PIN='6589';
+var MAX_AUTO=12;
+var SEUIL_PCT=60;
+
+var QUESTIONS=[
+  {id:'q1',type:'mcq',pts:1,text:'Combien de grandes familles de handicap existe-t-il ?',opts:['4','5','6','8'],correct:2},
+  {id:'q2',type:'multi',pts:1,text:'Citez les 6 grandes familles de handicap.',hint:'Sélectionnez toutes les bonnes réponses.',opts:['Handicap moteur','Handicap visuel','Handicap auditif','Handicap psychique','Déficience intellectuelle','Maladies invalidantes','Handicap olfactif','Handicap cognitif léger'],correct:[0,1,2,3,4,5]},
+  {id:'q3',type:'multi',pts:1,text:'Quelles sont les 3 grandes causes du handicap moteur ?',hint:'Sélectionnez les 3 grandes catégories.',opts:['Lésions cérébrales','Lésions médullaires et neuromusculaires','Lésions ostéo-articulaires','Lésions cardiaques','Troubles du langage'],correct:[0,1,2]},
+  {id:'q4',type:'multi',pts:1,text:'Quels sont les 6 indispensables pour accompagner une personne en situation de handicap ?',hint:'Sélectionnez les 6 bonnes réponses.',opts:['Humaines','Techniques','Le matériel','Réglementaires','Pédagogiques','Compensatoires','Financières','Administratives'],correct:[0,1,2,3,4,5]},
+  {id:'q5',type:'mcq',pts:1,text:'Quelles sont les deux grandes fédérations sportives rattachées aux personnes en situation de handicap ?',opts:['FIFA et FFA','FFSA et Handisport','UNSS et UGSEL','FFN et FFA'],correct:1},
+  {id:'q6',type:'mcq',pts:1,text:'En quelle date a été votée la loi sur le handicap ?',opts:['11 février 1998','11 février 2002','11 février 2005','11 février 2010'],correct:2},
+  {id:'q7',type:'mcq',pts:1,text:'Quelle est la différence entre un cérébro-lésé et un blessé médullaire ?',opts:['Le cérébro-lésé a une lésion de la moelle épinière, le blessé médullaire du cerveau','Le cérébro-lésé a une lésion du cerveau, le blessé médullaire a une atteinte de la moelle épinière','Ce sont deux termes synonymes','Le cérébro-lésé est toujours en fauteuil'],correct:1},
+  {id:'q8',type:'mcq',pts:1,text:'Quelle est la différence entre un paraplégique et un hémiplégique ?',opts:['Le paraplégique a une atteinte de la moitié du corps, l\'hémiplégique des membres inférieurs','Le paraplégique a une atteinte des membres inférieurs, l\'hémiplégique a une atteinte de la moitié du corps','Aucune différence clinique','Le paraplégique ne peut jamais marcher'],correct:1},
+  {id:'q9',type:'mcq',pts:1,text:'Un quadriplégique (tétraplégique) a-t-il des appuis ?',opts:['Non, aucun appui possible','Oui, uniquement des appuis passifs','Oui, des appuis passifs, compensatoires actifs, et hydrodynamiques en natation','Oui, mais uniquement dans l\'eau'],correct:2},
+  {id:'q10',type:'mcq',pts:1,text:'Qu\'est-ce qu\'une personne dyspraxique (TDC) ?',opts:['Une personne qui ne peut pas marcher','Une personne dont le cerveau ne sait pas donner les bonnes instructions aux muscles pour réaliser un mouvement volontaire','Une personne ayant une déficience intellectuelle','Une personne ayant une atteinte visuelle sévère'],correct:1},
+  {id:'q11',type:'multi',pts:1,text:'Parmi ces auteurs, lesquels sont des références en natation ?',hint:'Sélectionnez tous les auteurs de référence.',opts:['Raymond Catteau','Patrick Schmidt','Jean Vivensang','McMillan (Halliwick)','Pellayo / Gazel','Pierre de Coubertin','Roger Federer'],correct:[0,1,2,3,4]},
+  {id:'q12',type:'multi',pts:1,text:'Quelles sont les méthodes didactiques étudiées dans la formation ?',hint:'Sélectionnez toutes les méthodes.',opts:['Catteau — pédagogie de l\'action','Schmidt — le corps flottant','Vivensang — équilibre, respiration, propulsion','Halliwick — méthode en 10 points','Méthode Montessori aquatique','Méthode Pilates adaptée'],correct:[0,1,2,3]},
+  {id:'q13',type:'open',pts:2,text:'Quelles peuvent être les différentes causes du handicap ? Citez des exemples pour chaque grande catégorie.',hint:'Question ouverte — réponse libre.',correction:'Les 3 grandes catégories :\n1. Lésions cérébrales : traumatismes crâniens, AVC, anoxie cérébrale, tumeurs, malformations, encéphalopathie\n2. Lésions médullaires et neuromusculaires : blessés médullaires, spina bifida, poliomyélite, amyotrophie spinale, myopathies\n3. Lésions ostéo-articulaires : malformations, amputations, dysplasies osseuses, scolioses, lésions rhumatismales'}
+];
+var MAX_PTS=QUESTIONS.reduce(function(s,q){return s+q.pts;},0);
+
+var stagiaires=[];
+var cur={prenom:'',nom:'',date:'',formation:'',answers:{},critPage:0};
+var evalIdx=-1;
+var pinEntry='';
+var multiSel=[];
+
+/* ── INIT ── */
+function startQuiz(){
+  var p=document.getElementById('f-prenom').value.trim();
+  var n=document.getElementById('f-nom').value.trim();
+  var d=document.getElementById('f-date').value;
+  var f=document.getElementById('f-formation').value;
+  if(!p||!n){alert('Merci de saisir prénom et nom.');return;}
+  if(!d){alert('Merci de saisir la date de la session.');return;}
+  if(!f){alert('Merci de sélectionner une formation.');return;}
+  cur={prenom:p,nom:n,date:d,formation:f,answers:{},critPage:0};
+  showPage(1);renderQuestion();
+}
+
+function nextStagiaire(){
+  cur={prenom:'',nom:'',date:cur.date,formation:cur.formation,answers:{},critPage:0};
+  document.getElementById('f-prenom').value='';
+  document.getElementById('f-nom').value='';
+  document.getElementById('f-date').value=cur.date;
+  document.querySelector('#f-formation option[selected]') && (document.getElementById('f-formation').value=cur.formation);
+  pinEntry='';updatePinDots();
+  document.getElementById('pin-error').textContent='';
+  showPage(0);
+}
+
+/* ── PAGES ── */
+function showPage(n){
+  ['p0','p1','p2','p3','p4','p5'].forEach(function(id,i){document.getElementById(id).classList.toggle('active',i===n);});
+  var p=[5,40,40,60,80,100][n];
+  document.getElementById('prog-bar').style.width=p+'%';
+  window.scrollTo(0,0);
+}
+
+/* ── QUESTIONS ── */
+function renderQuestion(){
+  var q=QUESTIONS[cur.critPage];
+  var total=QUESTIONS.length;
+  document.getElementById('topbar-right').textContent=(cur.critPage+1)+' / '+total;
+  var steps='';
+  for(var i=0;i<total;i++)steps+='<div class="ps'+(i<cur.critPage?' done':i===cur.critPage?' active':'')+'"></div>';
+  document.getElementById('prog-steps').innerHTML=steps;
+  var h='<div class="q-block"><div class="q-num">Question '+(cur.critPage+1)+' sur '+total+'</div>';
+  h+='<div class="q-text">'+q.text+'</div>';
+  if(q.hint)h+='<div class="q-hint">'+q.hint+'</div>';
+  if(q.type==='mcq'){
+    h+='<div class="opt-grid">';
+    q.opts.forEach(function(o,i){
+      var sel=cur.answers[q.id]===i;
+      h+='<button class="opt-btn'+(sel?' selected':'')+'" onclick="selMCQ('+i+')">'+o+'</button>';
+    });
+    h+='</div>';
+  } else if(q.type==='multi'){
+    h+='<div class="check-grid">';
+    q.opts.forEach(function(o,i){
+      var saved=cur.answers[q.id+'_sel']||[];
+      var sel=saved.indexOf(i)>-1;
+      h+='<div class="check-opt'+(sel?' selected':'')+'" onclick="toggleCk('+i+')"><div class="check-box">'+(sel?'✓':'')+'</div><span class="check-label">'+o+'</span></div>';
+    });
+    h+='</div>';
+  } else {
+    h+='<textarea class="open-textarea" id="open-ans" placeholder="Rédigez votre réponse ici...">'+(cur.answers[q.id]||'')+'</textarea>';
+  }
+  h+='</div>';
+  document.getElementById('question-zone').innerHTML=h;
+  renderQNav();
+}
+
+function renderQNav(){
+  var idx=cur.critPage;var last=idx===QUESTIONS.length-1;
+  var h='';
+  if(idx>0)h+='<button class="btn-back" onclick="prevQ()">← Précédent</button>';
+  h+='<button class="btn-next'+(idx===0?' btn-full':'')+'" onclick="'+(last?'finishQuiz()':'nextQ()')+'">'+( last?'Terminer ✓':'Question suivante →')+'</button>';
+  document.getElementById('q-nav').innerHTML=h;
+}
+
+function selMCQ(i){var q=QUESTIONS[cur.critPage];cur.answers[q.id]=i;renderQuestion();}
+
+function toggleCk(i){
+  var q=QUESTIONS[cur.critPage];
+  var sel=cur.answers[q.id+'_sel']||[];
+  var idx=sel.indexOf(i);
+  if(idx>-1)sel.splice(idx,1);else sel.push(i);
+  cur.answers[q.id+'_sel']=sel;
+  renderQuestion();
+}
+
+function nextQ(){
+  var q=QUESTIONS[cur.critPage];
+  if(q.type==='open'){var ta=document.getElementById('open-ans');if(ta)cur.answers[q.id]=ta.value.trim();}
+  cur.critPage++;renderQuestion();
+}
+function prevQ(){
+  var q=QUESTIONS[cur.critPage];
+  if(q.type==='open'){var ta=document.getElementById('open-ans');if(ta)cur.answers[q.id]=ta.value.trim();}
+  cur.critPage--;renderQuestion();
+}
+
+function finishQuiz(){
+  var q=QUESTIONS[cur.critPage];
+  if(q.type==='open'){var ta=document.getElementById('open-ans');if(ta)cur.answers[q.id]=ta.value.trim();}
+  /* Finaliser les multi */
+  QUESTIONS.forEach(function(q2){
+    if(q2.type==='multi'&&!cur.answers[q2.id])cur.answers[q2.id]=cur.answers[q2.id+'_sel']||[];
+  });
+  /* Sauver dans la liste */
+  stagiaires.push(JSON.parse(JSON.stringify(cur)));
+  pinEntry='';updatePinDots();
+  document.getElementById('pin-error').textContent='';
+  showPage(2);
+}
+
+/* ── PIN ── */
+function pinPress(d){if(pinEntry.length>=4)return;pinEntry+=d;updatePinDots();if(pinEntry.length===4)setTimeout(checkPin,150);}
+function pinClear(){pinEntry=pinEntry.slice(0,-1);updatePinDots();document.getElementById('pin-error').textContent='';}
+function updatePinDots(){for(var i=0;i<4;i++){var d=document.getElementById('pd'+i);d.className='pin-dot';if(i<pinEntry.length)d.classList.add('filled');}}
+function checkPin(){
+  if(pinEntry===PIN){document.getElementById('pin-error').textContent='';showPage(3);renderDashboard();}
+  else{for(var i=0;i<4;i++)document.getElementById('pd'+i).className='pin-dot error';document.getElementById('pin-error').textContent='Code incorrect.';setTimeout(function(){pinEntry='';updatePinDots();},1200);}
+}
+
+/* ── DASHBOARD ── */
+function renderDashboard(){
+  document.getElementById('topbar-sub').textContent='Tableau de bord formateur';
+  var ev=stagiaires.filter(function(s){return s.validated;});
+  var ok=ev.filter(function(s){return s.pct>=SEUIL_PCT;});
+  document.getElementById('db-zone').innerHTML=
+    '<div class="db-hero"><h2>Tableau de bord formateur</h2><p>Cliquer sur un stagiaire pour corriger son quiz</p>'
+    +'<div class="db-stats">'
+    +'<div class="db-stat"><div class="dsn">'+stagiaires.length+'</div><div class="dsl">Stagiaires</div></div>'
+    +'<div class="db-stat"><div class="dsn">'+ev.length+'</div><div class="dsl">Corrigés</div></div>'
+    +'<div class="db-stat"><div class="dsn">'+(ev.length?ok.length+'/'+ev.length:'—')+'</div><div class="dsl">Validés</div></div>'
+    +'</div></div>';
+
+  var h='<div class="card"><div class="card-title">Stagiaires</div>';
+  if(stagiaires.length===0)h+='<div style="text-align:center;color:#aaa;padding:16px;font-size:13px">Aucun stagiaire enregistré.</div>';
+  stagiaires.forEach(function(s,i){
+    var init=(s.prenom||'?')[0].toUpperCase()+(s.nom||'?')[0].toUpperCase();
+    var dateF=s.date?new Date(s.date).toLocaleDateString('fr-FR'):'—';
+    var statusH='';
+    if(s.validated){var o=s.pct>=SEUIL_PCT;statusH='<span class="score-badge">'+s.totalScore+'/'+MAX_PTS+'</span><span class="badge '+(o?'badge-ok':'badge-ko')+'">'+(o?'Validé':'Non validé')+'</span>';}
+    else statusH='<span class="badge badge-wait">À corriger</span>';
+    h+='<button class="stag-card '+(s.validated?'evaluated':'')+'" onclick="openCorr('+i+')">'
+      +'<div class="stag-avatar '+(s.validated?'':'pending')+'">'+init+'</div>'
+      +'<div class="stag-info"><div class="stag-name">'+s.prenom+' '+s.nom+'</div><div class="stag-meta">'+s.formation+' · '+dateF+'</div></div>'
+      +'<div class="stag-status">'+statusH+'</div></button>';
+  });
+  h+='</div>';
+  document.getElementById('stag-list-zone').innerHTML=h;
+  document.getElementById('stats-zone').innerHTML='';
+}
+
+/* ── CORRECTION ── */
+function autoScore(s){
+  var score=0;
+  QUESTIONS.forEach(function(q){
+    if(q.type==='open')return;
+    var ans=s.answers[q.id];
+    if(q.type==='mcq'&&ans===q.correct)score+=q.pts;
+    if(q.type==='multi'&&ans){
+      var ok=q.correct.every(function(c){return ans.indexOf(c)>-1;})&&ans.every(function(x){return q.correct.indexOf(x)>-1;});
+      if(ok)score+=q.pts;
+    }
+  });
+  return score;
+}
+
+function openCorr(idx){
+  evalIdx=idx;
+  var s=stagiaires[idx];
+  if(!s.corrOpen)s.corrOpen={};
+  if(s.bonus===undefined)s.bonus=0;
+  var dateF=s.date?new Date(s.date).toLocaleDateString('fr-FR'):'—';
+  var auto=autoScore(s);
+  var h='<div class="card" style="margin-bottom:12px">'
+    +'<div class="card-title">Correction — '+s.prenom+' '+s.nom+'</div>'
+    +'<div style="font-size:13px;color:#555;margin-bottom:4px">'+s.formation+' · '+dateF+'</div>'
+    +'<div style="font-size:13px;color:#1B3A6B;font-weight:700">Score auto : '+auto+' / '+MAX_AUTO+' pts</div>'
+    +'</div>';
+
+  QUESTIONS.forEach(function(q,i){
+    var ans=s.answers[q.id];
+    h+='<div class="corr-q">';
+    h+='<div class="corr-q-text">Q'+(i+1)+'. '+q.text+'</div>';
+
+    if(q.type==='mcq'){
+      var isOk=ans===q.correct;
+      h+='<div class="corr-answer answer-stag"><strong>Réponse :</strong> '+(ans!==undefined?q.opts[ans]:'Non répondu')+'</div>';
+      h+='<span class="auto-tag '+(isOk?'auto-ok':'auto-ko')+'">'+(isOk?'✓ Correct':'✗ Incorrect — Bonne réponse : '+q.opts[q.correct])+'</span>';
+    } else if(q.type==='multi'){
+      var selOpts=ans||[];
+      var isOk2=q.correct.every(function(c){return selOpts.indexOf(c)>-1;})&&selOpts.every(function(x){return q.correct.indexOf(x)>-1;});
+      var selTxt=selOpts.length?selOpts.map(function(i2){return q.opts[i2];}).join(', '):'Non répondu';
+      h+='<div class="corr-answer answer-stag"><strong>Réponse :</strong> '+selTxt+'</div>';
+      h+='<span class="auto-tag '+(isOk2?'auto-ok':'auto-ko')+'">'+(isOk2?'✓ Correct':'✗ Incorrect — Attendu : '+q.correct.map(function(c){return q.opts[c];}).join(', '))+'</span>';
+    } else {
+      var rep=ans||'(pas de réponse)';
+      h+='<div class="corr-answer answer-stag"><strong>Réponse du stagiaire :</strong><br>'+rep+'</div>';
+      h+='<div class="corr-answer answer-ref"><strong>Éléments attendus :</strong><br><span style="white-space:pre-line">'+q.correction+'</span></div>';
+      var corrVal=s.corrOpen[q.id];
+      h+='<div class="corr-btns">'
+        +'<button class="corr-btn ok'+(corrVal===1?' active':'')+'" onclick="setCorrOpen(\''+q.id+'\',1,'+q.pts+')">✓ Correct (+'+q.pts+' pt'+(q.pts>1?'s':'')+')</button>'
+        +'<button class="corr-btn ko'+(corrVal===0?' active':'')+'" onclick="setCorrOpen(\''+q.id+'\',0,0)">✗ Incomplet (0 pt)</button>'
+        +'</div>';
+    }
+    h+='</div>';
+  });
+
+  /* Bonus */
+  h+='<div class="bonus-block">'
+    +'<div class="bonus-title">Points bonus formateur</div>'
+    +'<div class="bonus-desc">Attribuez 0 à 3 points bonus pour récompenser un engagement ou une qualité remarquable.<br>'
+    +'0 = aucun bonus · 1 = qualité notable · 2 = très bonne initiative · 3 = excellence</div>'
+    +'<div class="bonus-btns">'
+    +[0,1,2,3].map(function(v){return '<button class="bonus-btn'+(s.bonus===v?' active':'')+'" onclick="setBonus('+v+')">'+v+'</button>';}).join('')
+    +'</div></div>';
+
+  h+='<div class="nav">'
+    +'<button class="btn-back" onclick="showPage(3);renderDashboard()">← Tableau de bord</button>'
+    +'<button class="btn-next" onclick="validateCorr()">Valider la correction ✓</button>'
+    +'</div>';
+
+  document.getElementById('corr-zone').innerHTML=h;
+  showPage(4);
+}
+
+function setCorrOpen(qid,val,pts){
+  stagiaires[evalIdx].corrOpen[qid]={val:val,pts:pts};
+  openCorr(evalIdx);
+}
+
+function setBonus(v){
+  stagiaires[evalIdx].bonus=v;
+  openCorr(evalIdx);
+}
+
+function validateCorr(){
+  var s=stagiaires[evalIdx];
+  var auto=autoScore(s);
+  var openPts=0;
+  QUESTIONS.forEach(function(q){if(q.type==='open'&&s.corrOpen[q.id])openPts+=s.corrOpen[q.id].pts;});
+  s.autoScore=auto;
+  s.openScore=openPts;
+  s.bonus=s.bonus||0;
+  s.totalScore=auto+openPts+s.bonus;
+  s.pct=Math.round(s.totalScore/(MAX_PTS+3)*100);
+  s.validated=true;
+  stagiaires[evalIdx]=s;
+  showResult(evalIdx);
+}
+
+/* ── RÉSULTAT ── */
+function showResult(idx){
+  var s=stagiaires[idx];
+  var ok=s.pct>=SEUIL_PCT;
+  var col=ok?'#1B3A6B':'#B5281C';
+  var bcol=ok?'#7B4FA6':'#B5281C';
+  var dateF=s.date?new Date(s.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}):'—';
+
+  var rows='';
+  QUESTIONS.forEach(function(q,i){
+    var ans=s.answers[q.id];
+    var tag='';
+    if(q.type==='open'){
+      var co=s.corrOpen&&s.corrOpen[q.id];
+      tag='<span class="badge '+(co&&co.val===1?'badge-ok':'badge-ko')+'">'+(co&&co.val===1?'✓ +'+co.pts+' pt':'✗ 0 pt')+'</span>';
+    } else if(q.type==='mcq'){
+      var ok2=ans===q.correct;
+      tag='<span class="badge '+(ok2?'badge-ok':'badge-ko')+'">'+(ok2?'✓ 1 pt':'✗ 0 pt')+'</span>';
+    } else {
+      var ok3=ans&&q.correct.every(function(c){return ans.indexOf(c)>-1;})&&ans.every(function(x){return q.correct.indexOf(x)>-1;});
+      tag='<span class="badge '+(ok3?'badge-ok':'badge-ko')+'">'+(ok3?'✓ 1 pt':'✗ 0 pt')+'</span>';
+    }
+    rows+='<div class="recap-row"><span class="rk">Q'+(i+1)+'. '+q.text+'</span>'+tag+'</div>';
+  });
+
+  var html='<div class="score-final" style="border:2px solid '+bcol+'">'
+    +'<div class="score-num" style="color:'+col+'">'+s.totalScore+'<span style="font-size:20px;font-weight:400;color:#888"> / '+(MAX_PTS+3)+'</span></div>'
+    +'<div style="font-size:13px;color:#7B4FA6;margin:4px 0;font-weight:700">'+(s.bonus>0?'+'+s.bonus+' point'+(s.bonus>1?'s':'')+' bonus':'')+'</div>'
+    +'<div class="score-verdict" style="color:'+col+'">'+(ok?'✓ Quiz validé':'✗ Quiz non validé')+'</div>'
+    +'<div class="score-detail">Score : '+s.pct+'% — Seuil : '+SEUIL_PCT+'%</div>'
+    +'</div>'
+    +'<div class="card"><div class="card-title">Récapitulatif — '+s.prenom+' '+s.nom+' — '+dateF+'</div>'
+    +rows
+    +'<div class="recap-row" style="margin-top:4px;border-top:1px solid #E8E0F0"><span class="rk">Score auto ('+MAX_AUTO+' questions)</span><span class="badge badge-ok">'+s.autoScore+' / '+MAX_AUTO+'</span></div>'
+    +'<div class="recap-row"><span class="rk">Question ouverte</span><span class="badge '+(s.openScore>0?'badge-ok':'badge-ko')+'">'+s.openScore+' / 2</span></div>'
+    +'<div class="recap-row"><span class="rk">Bonus formateur</span><span class="badge badge-ok" style="background:#EDE6F5;color:#7B4FA6">+'+s.bonus+'</span></div>'
+    +'<div class="total-row"><span style="font-weight:800;font-size:16px">Total</span><span style="font-size:22px;font-weight:900;color:'+col+'">'+s.totalScore+' / '+(MAX_PTS+3)+'</span></div>'
+    +'</div>'
+    +'<div class="nav">'
+    +'<button class="btn-back" onclick="showPage(3);renderDashboard()">← Tableau de bord</button>'
+    +'<button class="btn-next" onclick="window.print()">Imprimer ↗</button>'
+    +'</div>';
+  document.getElementById('result-zone').innerHTML=html;
+  showPage(5);
+}
+
+/* ── EXPORTS ── */
+function exportCSV(){
+  if(!stagiaires.length){alert('Aucune donnée à exporter.');return;}
+  var heads=['Prénom','Nom','Date session','Formation'];
+  QUESTIONS.forEach(function(q,i){heads.push('Q'+(i+1)+' ('+q.pts+'pt)');});
+  heads.push('Score auto','Score question ouverte','Bonus','Score total','Score max','Pourcentage','Résultat');
+  var rows=[heads.join(';')];
+  stagiaires.forEach(function(s){
+    var row=[s.prenom,s.nom,s.date,s.formation];
+    QUESTIONS.forEach(function(q){
+      var ans=s.answers[q.id];
+      if(q.type==='mcq')row.push(ans===q.correct?q.opts[ans]+'(✓)':ans!==undefined?q.opts[ans]+'(✗)':'—');
+      else if(q.type==='multi'){var ok=(ans||[]);row.push(ok.map(function(i2){return q.opts[i2];}).join(' / '));}
+      else row.push(ans||'—');
+    });
+    row.push(s.autoScore||0,s.openScore||0,s.bonus||0,s.totalScore||0,MAX_PTS+3,(s.pct||0)+'%',s.validated?(s.pct>=SEUIL_PCT?'VALIDÉ':'NON VALIDÉ'):'EN ATTENTE');
+    rows.push(row.map(function(v){return '"'+(v||'').toString().replace(/"/g,'""')+'"';}).join(';'));
+  });
+  var csv='\uFEFF'+rows.join('\n');
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='quiz_laplajh_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+function exportHTML(){
+  if(!stagiaires.length){alert('Aucune donnée à exporter.');return;}
+  var ev=stagiaires.filter(function(s){return s.validated;});
+  var ok=ev.filter(function(s){return s.pct>=SEUIL_PCT;});
+  var avg=ev.length?Math.round(ev.reduce(function(a,s){return a+(s.pct||0);},0)/ev.length):0;
+  var rows=stagiaires.map(function(s){
+    var dateF=s.date?new Date(s.date).toLocaleDateString('fr-FR'):'—';
+    var res=s.validated?(s.pct>=SEUIL_PCT?'VALIDÉ':'NON VALIDÉ'):'EN ATTENTE';
+    var col=res==='VALIDÉ'?'#2E7D52':res==='NON VALIDÉ'?'#B5281C':'#888';
+    return '<tr style="border-bottom:1px solid #eee">'
+      +'<td style="padding:8px">'+s.prenom+' '+s.nom+'</td>'
+      +'<td style="padding:8px;font-size:12px;color:#555">'+s.formation+'</td>'
+      +'<td style="padding:8px;text-align:center">'+dateF+'</td>'
+      +'<td style="padding:8px;text-align:center;font-weight:700">'+(s.totalScore||'—')+'/'+(MAX_PTS+3)+'</td>'
+      +'<td style="padding:8px;text-align:center">'+(s.pct||'—')+'%</td>'
+      +'<td style="padding:8px;text-align:center;font-weight:800;color:'+col+'">'+res+'</td>'
+    +'</tr>';
+  }).join('');
+  var date=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Quiz LAPLA\'JH — Récapitulatif</title>'
+    +'<style>body{font-family:sans-serif;margin:20px;color:#1a1a1a}@media print{.no-print{display:none}}</style></head><body>'
+    +'<div style="background:linear-gradient(135deg,#1B3A6B,#7B4FA6);color:white;padding:20px 24px;border-radius:12px;margin-bottom:20px">'
+    +'<h1 style="font-size:18px;margin-bottom:4px">LAPLA\'JH Formation — Résultats quiz théorique</h1>'
+    +'<p style="opacity:.8;font-size:13px">Généré le '+date+' · '+stagiaires.length+' stagiaires · '+ev.length+' corrigés · '+ok.length+' validés · Moyenne : '+avg+'%</p>'
+    +'<p style="opacity:.7;font-size:11px;margin-top:4px">Document Qualiopi — Critère 3 · Seuil de validation : '+SEUIL_PCT+'%</p></div>'
+    +'<div class="no-print" style="margin-bottom:14px"><button onclick="window.print()" style="padding:10px 20px;background:#7B4FA6;border:none;border-radius:8px;color:white;font-size:14px;font-weight:700;cursor:pointer">Imprimer</button></div>'
+    +'<table style="width:100%;border-collapse:collapse;font-size:13px">'
+    +'<thead><tr style="background:#F4F0F8"><th style="padding:10px;text-align:left">Stagiaire</th><th style="padding:10px;text-align:left">Formation</th><th style="padding:10px;text-align:center">Date</th><th style="padding:10px;text-align:center">Score</th><th style="padding:10px;text-align:center">%</th><th style="padding:10px;text-align:center">Résultat</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table></body></html>';
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
+  a.download='recapitulatif_quiz_'+new Date().toISOString().slice(0,10)+'.html';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+/* Date par défaut = aujourd'hui */
+document.getElementById('f-date').value=new Date().toISOString().slice(0,10);
+</script>
+</body>
+</html>
